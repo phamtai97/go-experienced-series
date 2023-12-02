@@ -5,6 +5,7 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"go.uber.org/zap"
 	"user-service/internal/core/port/repository"
 	"user-service/internal/infra/config"
 )
@@ -41,6 +42,7 @@ func newDatabase(conf config.DatabaseConfig) (*sql.DB, error) {
 }
 
 func (da database) Close() error {
+	zap.L().Info("close database")
 	return da.DB.Close()
 }
 

@@ -7,10 +7,11 @@ import (
 	"syscall"
 
 	"github.com/gin-gonic/gin"
-	"user-service/internal/controller"
-	"user-service/internal/core/server"
+	http2 "user-service/internal/controller/http"
+	"user-service/internal/core/config"
+	"user-service/internal/core/server/http"
 	"user-service/internal/core/service"
-	"user-service/internal/infra/config"
+	infraConf "user-service/internal/infra/config"
 	"user-service/internal/infra/repository"
 )
 
@@ -21,7 +22,7 @@ func main() {
 
 	// Initialize the database connection
 	db, err := repository.NewDB(
-		config.DatabaseConfig{
+		infraConf.DatabaseConfig{
 			Driver:                  "mysql",
 			Url:                     "user:password@tcp(127.0.0.1:3306)/your_database_name?charset=utf8mb4&parseTime=true&loc=UTC&tls=false&readTimeout=3s&writeTimeout=3s&timeout=3s&clientFoundRows=true",
 			ConnMaxLifetimeInMinute: 3,
@@ -40,13 +41,13 @@ func main() {
 	userService := service.NewUserService(userRepo)
 
 	// Create the UserController
-	userController := controller.NewUserController(instance, userService)
+	userController := http2.NewUserController(instance, userService)
 
 	// Initialize the routes for UserController
 	userController.InitRouter()
 
 	// Create the HTTP server
-	httpServer := server.NewHttpServer(
+	httpServer := http.NewHttpServer(
 		instance,
 		config.HttpServerConfig{
 			Port: 8000,
@@ -55,7 +56,12 @@ func main() {
 
 	// Start the HTTP server
 	httpServer.Start()
-	defer httpServer.Stop()
+	defer func(httpServer http.HttpServer) {
+		err := httpServer.Close()
+		if err != nil {
+			log.Printf("failed to close http server %v", err)
+		}
+	}(httpServer)
 
 	// Listen for OS signals to perform a graceful shutdown
 	log.Println("listening signals...")

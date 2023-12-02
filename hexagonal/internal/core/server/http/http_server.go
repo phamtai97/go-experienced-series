@@ -1,21 +1,22 @@
-package server
+package http
 
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"user-service/internal/infra/config"
+	"user-service/internal/core/config"
 )
 
 const defaultHost = "0.0.0.0"
 
 type HttpServer interface {
 	Start()
-	Stop()
+	io.Closer
 }
 
 type httpServer struct {
@@ -45,13 +46,11 @@ func (httpServer httpServer) Start() {
 	log.Printf("Start Service with port %d\n", httpServer.Port)
 }
 
-func (httpServer httpServer) Stop() {
+func (httpServer httpServer) Close() error {
 	ctx, cancel := context.WithTimeout(
 		context.Background(), time.Duration(3)*time.Second,
 	)
 	defer cancel()
 
-	if err := httpServer.server.Shutdown(ctx); err != nil {
-		log.Fatalf("Server forced to shutdown err=%s\n", err.Error())
-	}
+	return httpServer.server.Shutdown(ctx)
 }

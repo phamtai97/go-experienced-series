@@ -18,7 +18,7 @@ var (
 )
 
 const (
-	insertUserStatement = "INSERT INTO User_test( " +
+	insertUserStatement = "INSERT INTO User ( " +
 		"`username`, " +
 		"`password`, " +
 		"`display_name`, " +

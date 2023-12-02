@@ -7,7 +7,3 @@ type DatabaseConfig struct {
 	MaxOpenConns            int
 	MaxIdleConns            int
 }
-
-type HttpServerConfig struct {
-	Port uint
-}

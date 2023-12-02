@@ -1,2 +1,2 @@
 #! /bin/sh
-go run ../cmd/runner.go
+go run ./cmd/grpc/runner.go
